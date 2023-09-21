@@ -2,6 +2,109 @@
 # token = 6490562332:AAGEYO0zk8PWC2jG-cx7YnrgLcxjtdR2ICM
 
 
+# измени данный код
+# необходимо запрашивать у пользователя категорию анекдотов одну из 5
+
+# В предоставленном коде добавь функционал который связывает наш код бота с google sheets и использует таблицу как базу данных с анекдотами
+
+# в данной базе должно у нас есть 2 листа:
+# Лист1 и Лист2
+
+
+# Добавь данный функционал
+# 1.
+# 5 inline кнопок для выбора категории анекдота:
+# # 1 Анекдоты для друзей
+# 2 Анекдоты для <3
+# 3 Анекдоты для родителей
+# 4 Анекдоты 18+
+# 5 Анекдоты для 60+
+#
+# Добавь данный функционал
+# 2.
+# Лист1 (главная база данных) там находятся Номер анекдота/Категория анекдота/Сам анекдот
+# Номер анекдота: это всегда цифра (>0 int)
+# Категорий анекдота 5: 1 Анекдоты для друзей 2 Анекдоты для <3 3 Анекдоты для родителей 4 Анекдоты 18+ 5 Анекдоты для 60+
+#
+# Пример (Лист1):
+# Номер 	Категория анекдота	Анекдот
+# 1	Анекдот 18+	Взрослый — это тогда, когда идёшь зимой по улице без шапки и понимаешь, что ты сова.
+# 2	Анекдот для друзей	Друзья - это те, кто знает все твои секреты, но все равно любят тебя.
+# 3	Анекдот для <3	Самое лучшее чувство - это, когда кто-то делает твой мир ярче и счастливее.
+# 4	Анекдот 60+	Жизнь после 60 - это новое приключение каждый день.
+# 5	Анекдот для родителей	Родители - это те, кто всегда заботился о вашем будущем.
+# ...
+# Лист1 является прямым потоком дынных для бота в виде анекдотов по категориям!
+# Если пользователь просто хочет получить анекдот то он выбирает /joke
+# Затем категорию анекдота
+# Затем из базы данных (Лист1) в случайном порядке без повторения ему отправляются анекдоты из категории которую он выбрал
+# После каждого отправленного анекдота у пользователя снова появляется (inline меню) с выбором категории анекдота
+# Если уникальные анекдоты в категории закончились, тогда пользователю выводится сообщение "Новые анекдоты совсем скоро!"
+#
+# Добавь данный функционал
+# 3.
+# Лист2 в нем находятся такие данные Никнейм пользователя / Дата и Время добавления анекдота /Id пользователя / Категория анекдота /Добавленный пользователем анекдот
+# Когда пользователь хочет добавить анекдот /create ( анекдот попадает в лист номер 2 где хранится в общей таблице)
+
+
+# Появляется меню из трех кнопок Inline (подключенные к самому анекдоту
+
+# пример:
+# Анекдот 1
+
+# Оценка анекдота:
+# Отлично | Нормально | Плохо
+# где Отлично, Нормально, Плохо это inline кнопки
+
+
+# после оценки пользователя данная оценка попадает в табличку google sheets list 1
+
+
+# так же необходимо добавить обработку отправленных анекдотов
+# Так если в таблице 2 анекдота в категории  "Анекдоты для <3"  и пользователь 2 раза запросил "Анекдоты для <3" то
+
+# и если пользователь запросил "Анекдоты для <3" но в таблице их больше не т
+
+
+# @bot.message_handler(commands=["joke"])
+# def joke(message):
+#     user_id = message.from_user.id
+#     markup = types.InlineKeyboardMarkup(row_width=2)
+
+#     categories = ["Анекдоты для друзей", "Анекдоты для <3",
+#                   "Анекдоты для родителей", "Анекдоты 18+", "Анекдоты 60+"]
+
+#     for category in categories:
+#         callback_data = f"category_{category}"
+#         button = types.InlineKeyboardButton(
+#             category, callback_data=callback_data)
+#         markup.add(button)
+
+#     bot.send_message(user_id, "Выберите категорию анекдота:",
+#                      reply_markup=markup)
+
+
+# @bot.callback_query_handler(func=lambda call: call.data.startswith("category_"))
+# def category_selected(call):
+#     user_id = call.from_user.id
+#     category = call.data.split("_")[1]
+
+#     jokes = worksheet1.get_all_records()
+
+#     jokes_in_category = [
+#         joke for joke in jokes if joke["Категория анекдота"] == category]
+
+#     if jokes_in_category:
+
+#         joke = random.choice(jokes_in_category)
+#         bot.send_message(user_id, joke["Сам анекдот"])
+#     else:
+#         bot.send_message(user_id, "Извините, в этой категории анекдотов нет.")
+
+# В button2 = types.InlineKeyboardButton("Выбор категории анекдотов", callback_data="joke_by_category")
+# Необходимо удалять Inline меню после выбора категории анекдота
+# Необходимо в рандомном порядке без повторов отправлять анекдоты по выбранным категориям так что бы у пользователя анекдоты не повторялись, в случае окончания колл-ва анекдотов из выбранной категории, отправлять соответствующее сообщение
+
 import telebot
 import gspread
 import random
@@ -9,84 +112,327 @@ from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 from telebot import types
 
-# Укажите путь к файлу JSON с учетными данными вашего сервисного аккаунта для доступа к Google Sheets
-CREDENTIALS_FILE = 'service.json'
-SPREADSHEET_NAME = 'Anekdots'
 
-# Инициализация бота
-TOKEN_BOT = '6490562332:AAGEYO0zk8PWC2jG-cx7YnrgLcxjtdR2ICM'
+CREDENTIALS_FILE = "credentials.json"
+SPREADSHEET_NAME = "Anekdots"
+
+TOKEN_BOT = "6490562332:AAGEYO0zk8PWC2jG-cx7YnrgLcxjtdR2ICM"
 bot = telebot.TeleBot(TOKEN_BOT)
 
-# Инициализация Google Sheets API
-scope = ['https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
+
+scope = ["https://spreadsheets.google.com/feeds",
+         "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name(
     CREDENTIALS_FILE, scope)
 client = gspread.authorize(creds)
-worksheet1 = client.open(SPREADSHEET_NAME).worksheet('Лист1')
-worksheet2 = client.open(SPREADSHEET_NAME).worksheet('Лист2')
+worksheet1 = client.open(SPREADSHEET_NAME).worksheet("Лист1")
+worksheet2 = client.open(SPREADSHEET_NAME).worksheet("Лист2")
+worksheet3 = client.open(SPREADSHEET_NAME).worksheet("Лист3")
+
+user_states = {}  # Словарь для отслеживания состояний пользователей
+
+sent_jokes = {}  # Словарь для отслеживания отправленных анекдотов
+
+current_category = None
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 def start(message):
     user_id = message.from_user.id
     user_name = message.from_user.first_name
-    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Записываем данные пользователя во второй лист Google таблицы
-    row = [user_name, current_datetime, user_id, "", ""]
-    worksheet2.append_row(row)
+    with open("First.jpg", "rb") as photo:
+        bot.send_photo(message.chat.id, photo)
 
-    # Отправляем приветственное сообщение
-    welcome_message = f"Добро пожаловать, {user_name}! Ваш ID: {user_id}"
-    bot.send_message(message.chat.id, welcome_message)
-
-# Добавьте обработку других команд и функциональность бота по мере необходимости
+    welcome_message1 = f"✌️ Добро пожаловать, {user_name} ! Ваш ID: {user_id}"
+    welcome_message2 = "Бот-анекдот - это лучший источник анекдотов в России. Если ваши анекдоты обычно вызывают тишину и недоумение в компании, а не смех, то этот бот - ваше спасение. У нас есть самые смешные анекдоты, которые поднимут настроение и заставят всех смеяться!\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create"
+    bot.send_message(message.chat.id, welcome_message1)
+    bot.send_message(message.chat.id, welcome_message2, parse_mode="html")
 
 
-@bot.message_handler(commands=['get_joke'])
-def get_joke(message):
+@bot.message_handler(commands=["joke"])
+def joke_command(message):
+    send_joke_keyboard(message)
+
+
+def send_joke_keyboard(message):
+    markup = types.InlineKeyboardMarkup(row_width=2)
+
+    button1 = types.InlineKeyboardButton(
+        "Поиск анекдота по номеру", callback_data="joke_by_number")
+    button2 = types.InlineKeyboardButton(
+        "Выбор категории анекдотов", callback_data="joke_by_category")
+    back_button = types.InlineKeyboardButton(
+        "Назад", callback_data="back_to_menu")
+
+    markup.add(button1, button2, back_button)
+
+    bot.send_message(
+        message.chat.id, "Выбери как ты хочешь получить анекдот:", reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_menu")
+def back_to_menu(call):
+    # Возвращение к главному меню
+    start(call.message)
+
+
+@bot.callback_query_handler(func=lambda call: call.data in ["joke_by_number", "joke_by_category"])
+def joke_selection(call):
+    user_id = call.from_user.id
+    if call.data == "joke_by_number":
+        user_states[user_id] = 'waiting_for_joke_number'
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        cancel_button = types.InlineKeyboardButton(
+            "Cancel", callback_data="cancel_joke_number")
+        markup.add(cancel_button)
+        bot.send_message(
+            user_id, "Введи номер анекдота:", reply_markup=markup)
+    else:
+        user_states[user_id] = 'waiting_for_joke_category'
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        categories = ["Анекдоты для друзей", "Анекдоты для знакомств",
+                      "Анекдоты для родителей", "Анекдоты 18+", "Анекдоты 60+"]
+        for category in categories:
+            button = types.InlineKeyboardButton(
+                category, callback_data=f"joke_category_{category}")
+            markup.add(button)
+        cancel_button = types.InlineKeyboardButton(
+            "Cancel", callback_data="cancel_joke_category")
+        markup.add(cancel_button)
+        bot.send_message(
+            user_id, "Выбери категорию анекдота:", reply_markup=markup)
+        # Remove inline keyboard after the user has made a selection
+    bot.edit_message_reply_markup(
+        call.message.chat.id, call.message.message_id, reply_markup=None)
+
+
+@bot.message_handler(func=lambda message: user_states.get(message.from_user.id) == "waiting_for_joke_number")
+def send_joke_by_number(message):
     user_id = message.from_user.id
-    user_name = message.from_user.first_name
+    try:
+        joke_number = int(message.text)+1
+        jokes = worksheet1.get_all_values()
+        if joke_number > len(jokes) or joke_number - 1 <= 0:
+            raise ValueError(
+                f"Анекдота с таким номером не существует.\n\nПопробуйте целое число больше 1 и меньше {len(jokes)}")
+        joke = jokes[joke_number - 1]
+        send_joke_with_category(user_id, joke[0], joke[2], joke[1])
+        user_states.pop(user_id, None)
+    except ValueError as e:
+        bot.send_message(user_id, f"Ошибка: {str(e)}\n\nПопробуйте снова")
 
-    # Получаем все анекдоты из первого листа Google таблицы
-    jokes = worksheet1.get_all_records()
 
-    if jokes:
-        random_joke = random.choice(jokes)
-        joke_text = random_joke["Сам анекдот"]
-        bot.send_message(message.chat.id, joke_text)
+# Добавьте глобальную переменную для хранения данных оценок
+ratings_data = {}
 
-        # Опрос пользователя об оценке анекдота
-        markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton(
-            "Отлично", callback_data=f"rate_good_{user_id}"))
-        markup.add(types.InlineKeyboardButton(
-            "Нормально", callback_data=f"rate_ok_{user_id}"))
-        markup.add(types.InlineKeyboardButton(
-            "Плохо", callback_data=f"rate_bad_{user_id}"))
+# В обработчике кнопки отправки анекдота, сохраните номер анекдота и категорию анекдота
+
+
+def send_joke_with_category(user_id, joke_id, joke_text, category):
+    markup = types.InlineKeyboardMarkup(row_width=3)
+    button1 = types.InlineKeyboardButton(
+        "Отлично", callback_data=f"rating_{joke_id}_1")
+    button2 = types.InlineKeyboardButton(
+        "Хорошо", callback_data=f"rating_{joke_id}_2")
+    button3 = types.InlineKeyboardButton(
+        "Плохо", callback_data=f"rating_{joke_id}_3")
+    markup.add(button1, button2, button3)
+
+    # Сохраните данные о номере анекдота и категории анекдота в глобальной переменной
+    ratings_data[user_id] = {
+        'joke_id': joke_id,
+        'category': category
+    }
+
+    bot.send_message(
+        user_id,
+        f"Категория: <u>{category}</u>\n\n<i><b>{joke_text}</b></i>\n\nОцените анекдот:",
+        reply_markup=markup,
+        parse_mode="html"
+    )
+
+    bot.send_message(
+        user_id,
+        "\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create"
+    )
+
+
+# Добавьте обработчик кнопок оценки
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("rating_"))
+def rate_joke(call):
+    user_id = call.from_user.id
+    data_parts = call.data.split("_")
+    rating = data_parts[2]
+
+    # Получите сохраненные данные о номере анекдота и категории анекдота
+    user_data = ratings_data.get(user_id)
+    if user_data:
+        joke_id = user_data['joke_id']   # Increment the joke_id by 1
+        category = user_data['category']
+        joke_id = int(joke_id)+1
+        jokes = worksheet1.get_all_values()
+        joke = jokes[int(joke_id) - 1]
+
+        # Отправьте данные оценки в Google Таблицу
+        worksheet3.append_row([user_id, joke_id, category, joke[2], rating])
 
         bot.send_message(
-            message.chat.id, "Пожалуйста, оцените анекдот:", reply_markup=markup)
+            user_id, f"Спасибо за вашу оценку!❤️")
     else:
-        bot.send_message(message.chat.id, "К сожалению, анекдоты закончились.")
+        bot.send_message(
+            user_id, "Произошла ошибка при оценке анекдота. Пожалуйста, попробуйте снова.")
+    bot.edit_message_reply_markup(
+        call.message.chat.id, call.message.message_id, reply_markup=None)
 
 
-@bot.callback_query_handler(lambda query: query.data.startswith('rate_'))
-def rate_joke(query):
-    rating = query.data.split('_')[1]
-    user_id = query.data.split('_')[2]
+@bot.callback_query_handler(func=lambda call: call.data.startswith("joke_category_"))
+def send_joke_by_category(call):
+    user_id = call.from_user.id
+    category = call.data.split("_")[2]
+    jokes = worksheet1.get_all_values()
+    category_jokes = [joke for joke in jokes if joke[1] == category]
 
-    # Записываем оценку пользователя во второй лист Google таблицы
-    user_row = worksheet2.find(user_id).row
-    if rating == "good":
-        worksheet2.update_cell(user_row, 4, "Отлично")
-    elif rating == "ok":
-        worksheet2.update_cell(user_row, 4, "Нормально")
-    elif rating == "bad":
-        worksheet2.update_cell(user_row, 4, "Плохо")
+    if user_id in sent_jokes:
+        category_jokes = [
+            joke for joke in category_jokes if joke not in sent_jokes[user_id]]
 
-    bot.send_message(query.message.chat.id, f"Спасибо за вашу оценку!")
+    if not category_jokes:
+        bot.send_message(
+            user_id, "Извините, вы уже прочитали все анекдоты из этой категории.")
+        return
+
+    joke = random.choice(category_jokes)
+    if user_id in sent_jokes:
+        sent_jokes[user_id].append(joke)
+    else:
+        sent_jokes[user_id] = [joke]
+
+    send_joke_with_category(user_id, joke[0], joke[2], joke[1])
+    user_states.pop(user_id, None)
+
+    bot.edit_message_reply_markup(
+        call.message.chat.id, call.message.message_id, reply_markup=None)
+
+
+###############
+###############
+###############
+###############
+###############
+###############
+
+
+@bot.message_handler(commands=["create"])
+def create_keyboard(message):
+    user_id = message.from_user.id
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    categories = ["Анекдоты для друзей", "Анекдоты для знакомств",
+                  "Анекдоты для родителей", "Анекдоты 18+", "Анекдоты 60+"]
+
+    for category in categories:
+        callback_data = f"create_{category}"
+        button = types.InlineKeyboardButton(
+            category, callback_data=callback_data)
+        markup.add(button)
+
+    cancel_button = types.InlineKeyboardButton(
+        "Отмена", callback_data="cancel")
+    markup.add(cancel_button)
+
+    bot.send_message(
+        message.chat.id, "Выберите категорию для вашего анекдота:", reply_markup=markup)
+    # Устанавливаем состояние ожидания выбора категории
+    user_states[user_id] = 'waiting_for_category'
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("create_"))
+def category_create_selected(call):
+    global current_category
+    user_id = call.from_user.id
+    current_category = call.data.split("_")[1]
+    markup = types.InlineKeyboardMarkup()
+    cancel_button = types.InlineKeyboardButton(
+        "Отмена", callback_data="cancel_input")
+    markup.add(cancel_button)
+    # Устанавливаем состояние ожидания ввода анекдота
+    user_states[user_id] = 'waiting_for_joke'
+    bot.send_message(
+        user_id, f"Вы выбрали категорию: {current_category}.\n\nТеперь введите ваш анекдот:", reply_markup=markup)
+    # Удаление кнопок из предыдущего сообщения
+    bot.edit_message_reply_markup(
+        call.message.chat.id, call.message.message_id, reply_markup=None)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    user_id = call.from_user.id
+
+    if call.data == "cancel_joke_number":
+        bot.send_message(
+            user_id, "Выбор номера отменен.\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create")
+        bot.answer_callback_query(call.id, "Вы отменили выбор номера.")
+        user_states.pop(user_id, None)
+        bot.edit_message_reply_markup(
+            call.message.chat.id, call.message.message_id, reply_markup=None)
+
+    elif call.data == "cancel_joke_category":
+        bot.send_message(
+            user_id, "Выбор категории отменен.\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create")
+        bot.answer_callback_query(call.id, "Вы отменили выбор категории.")
+        user_states.pop(user_id, None)
+        bot.edit_message_reply_markup(
+            call.message.chat.id, call.message.message_id, reply_markup=None)
+
+    elif call.data == "cancel":
+        if user_states.get(user_id) == 'waiting_for_category':
+            bot.answer_callback_query(call.id, "Вы отменили выбор категории.")
+        elif user_states.get(user_id) == 'waiting_for_joke':
+            bot.answer_callback_query(call.id, "Вы отменили ввод анекдота.")
+        user_states.pop(user_id, None)
+
+        bot.send_message(
+            call.message.chat.id, "Выбор категории отменен.\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create")
+        bot.edit_message_reply_markup(
+            call.message.chat.id, call.message.message_id)
+
+    elif call.data == "cancel_input":
+        bot.answer_callback_query(call.id, "Вы отменили ввод анекдота.")
+        user_states.pop(user_id, None)
+
+        bot.send_message(
+            call.message.chat.id, "Ввод анекдота отменен.\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create")
+        bot.edit_message_reply_markup(
+            call.message.chat.id, call.message.message_id)
+
+    elif call.data.startswith("create_"):
+        category_create_selected(call)
+        bot.edit_message_reply_markup(
+            call.message.chat.id, call.message.message_id)
+
+
+@bot.message_handler(func=lambda message: user_states.get(message.from_user.id) == 'waiting_for_joke')
+def save_joke(message):
+    global current_category
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    joke_text = message.text
+    row = [user_name, current_datetime, user_id, current_category, joke_text]
+    worksheet2.append_row(row)
+    with open("Merci.jpg", "rb") as photo:
+        bot.send_photo(message.chat.id, photo)
+    bot.send_message(
+        user_id, "Анекдот успешно добавлен!\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create")
+    user_states.pop(user_id, None)  # Удаляем состояние пользователя
+
+
+@bot.message_handler(func=lambda message: True)
+def echo_all(message):
+    message_text = 'Извините, я вас не понимаю :('
+    bot.reply_to(message, message_text)
 
 
 if __name__ == "__main__":
