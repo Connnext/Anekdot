@@ -1,5 +1,3 @@
-# google spreadsheets = 15XZffPS1tUpE6wOO0riA1Z34X1p6rIzyVm2MCtjFTk0
-# token = 6490562332:AAGEYO0zk8PWC2jG-cx7YnrgLcxjtdR2ICM
 import telebot
 import gspread
 import random
@@ -9,24 +7,20 @@ from telebot import types
 from dotenv import load_dotenv
 import os
 
-
 CREDENTIALS_FILE = "credentials.json"
-SPREADSHEET_NAME = "Anekdots"
 
 load_dotenv()
 
-# TOKEN_BOT = "6490562332:AAGEYO0zk8PWC2jG-cx7YnrgLcxjtdR2ICM"
 bot = telebot.TeleBot(os.getenv('TOKEN_BOT'))
-
 
 scope = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name(
     CREDENTIALS_FILE, scope)
 client = gspread.authorize(creds)
-worksheet1 = client.open(SPREADSHEET_NAME).worksheet("Лист1")
-worksheet2 = client.open(SPREADSHEET_NAME).worksheet("Лист2")
-worksheet3 = client.open(SPREADSHEET_NAME).worksheet("Лист3")
+worksheet1 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист1")
+worksheet2 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист2")
+worksheet3 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист3")
 
 user_states = {}  # Словарь для отслеживания состояний пользователей
 
