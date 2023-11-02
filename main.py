@@ -1,34 +1,32 @@
-import telebot
-import gspread
-import random
-from datetime import datetime
-from oauth2client.service_account import ServiceAccountCredentials
-from telebot import types
-from dotenv import load_dotenv
-import os
+import telebot  # импортируем библиотеку для создания Telegram ботов
+import gspread  # импортируем библиотеку для работы с Google Sheets
+import random  
+from datetime import datetime  
+from oauth2client.service_account import ServiceAccountCredentials 
+from telebot import types  #для создания inline клавиатур
+from dotenv import load_dotenv  # .env
+import os 
 
-CREDENTIALS_FILE = "credentials.json"
+CREDENTIALS_FILE = "credentials.json"  # имя файла с учетными данными для доступа к Google Sheets
 
-load_dotenv()
+load_dotenv()  
 
-bot = telebot.TeleBot(os.getenv('TOKEN_BOT'))
+bot = telebot.TeleBot(os.getenv('TOKEN_BOT')) 
 
-scope = ["https://spreadsheets.google.com/feeds",
-         "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(
-    CREDENTIALS_FILE, scope)
-client = gspread.authorize(creds)
-worksheet1 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист1")
-worksheet2 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист2")
-worksheet3 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист3")
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]  # список разрешений для доступа к Google Sheets API
+creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, scope)  # создаем экземпляр класса ServiceAccountCredentials с помощью файла с учетными данными и разрешений
+client = gspread.authorize(creds)  # авторизуемся в Google Sheets API с помощью учетных данных
+worksheet1 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист1")  
+worksheet2 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист2")  
+worksheet3 = client.open(os.getenv('SPREADSHEET_NAME')).worksheet("Лист3")  
 
 user_states = {}  # Словарь для отслеживания состояний пользователей
 
 sent_jokes = {}  # Словарь для отслеживания отправленных анекдотов
 
-ratings_data = {}
+ratings_data = {} # Словарь для отслеживания отправленных оценок
 
-current_category = None
+current_category = None # переменная для хранения текущей категории анекдотов
 
 
 @bot.message_handler(commands=["start"])
@@ -51,12 +49,12 @@ def joke_command(message):
 
 
 def send_joke_keyboard(message):
-    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup = types.InlineKeyboardMarkup(row_width=2)# создаем экземпляр класса InlineKeyboardMarkup с двумя кнопками в строке
 
     button1 = types.InlineKeyboardButton(
-        "Поиск анекдота по номеру", callback_data="joke_by_number")
+        "Номер", callback_data="joke_by_number")
     button2 = types.InlineKeyboardButton(
-        "Выбор категории анекдотов", callback_data="joke_by_category")
+        "Категория", callback_data="joke_by_category")
     back_button = types.InlineKeyboardButton(
         "Назад", callback_data="back_to_menu")
 
@@ -97,7 +95,6 @@ def joke_selection(call):
         markup.add(cancel_button)
         bot.send_message(
             user_id, "Выбери категорию анекдота:", reply_markup=markup)
-        # Remove inline keyboard after the user has made a selection
     bot.edit_message_reply_markup(
         call.message.chat.id, call.message.message_id, reply_markup=None)
 
@@ -110,7 +107,7 @@ def send_joke_by_number(message):
         jokes = worksheet1.get_all_values()
         if joke_number > len(jokes) or joke_number - 1 <= 0:
             raise ValueError(
-                f"Анекдота с таким номером не существует.\n\nПопробуйте целое число больше 1 и меньше {len(jokes)}")
+                f"Анекдота с таким номером не существует.\n\nПопробуйте целое число больше 0 и меньше {len(jokes)}")
         joke = jokes[joke_number - 1]
         send_joke_with_category(user_id, joke[0], joke[2], joke[1])
         user_states.pop(user_id, None)
@@ -148,17 +145,15 @@ def rate_joke(call):
     user_id = call.from_user.id
     data_parts = call.data.split("_")
     rating = data_parts[2]
-
-    # Получите сохраненные данные о номере анекдота и категории анекдота
     user_data = ratings_data.get(user_id)
     if user_data:
-        joke_id = user_data['joke_id']   # Increment the joke_id by 1
+        joke_id = user_data['joke_id']   
         category = user_data['category']
         joke_id = int(joke_id)+1
         jokes = worksheet1.get_all_values()
         joke = jokes[int(joke_id) - 1]
 
-        # Отправьте данные оценки в Google Таблицу
+        # Отправка данных в Google Таблицу
         worksheet3.append_row([user_id, joke_id, category, joke[2], rating])
 
         bot.send_message(
@@ -197,8 +192,6 @@ def send_joke_by_category(call):
 
     bot.edit_message_reply_markup(
         call.message.chat.id, call.message.message_id, reply_markup=None)
-
-###############
 
 
 @bot.message_handler(commands=["create"])
@@ -298,7 +291,7 @@ def save_joke(message):
     joke_text = message.text
     row = [user_name, current_datetime, user_id, current_category, joke_text]
     worksheet2.append_row(row)
-    with open("Merci.jpg", "rb") as photo:
+    with open("merci2.jpg", "rb") as photo:
         bot.send_photo(message.chat.id, photo)
     bot.send_message(
         user_id, "Анекдот успешно добавлен!\n\nДля выбора анекдота используй /joke\n\nДля создания своего анекдота используй /create")
